@@ -1,3 +1,5 @@
+
+![Link Logo](assets/logo.jpg)
 # Purl - API Testing Tool
 
 A powerful HTTP request testing tool with YAML configuration, variable substitution, fake data generation, and Python scripting capabilities.
