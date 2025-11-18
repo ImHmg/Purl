@@ -1,0 +1,35 @@
+# List Users Example
+# Demonstrates GET request with pagination
+
+Define:
+  pageSize: ${page_size}
+  dummyVarialble1: "123123123"
+Method: GET
+Endpoint: ${base_url}/api/v1/users
+
+QueryParams:
+  page: 1
+  limit: ${pageSize}
+  sort: created_at
+  order: desc
+  dummy: ${dummyVarialble1}
+  from: ${cli_from}
+
+Headers:
+  Authorization: ${authorization_token}
+  Accept: application/json
+  X-Request-ID: ${fake.uuid4()}
+
+Captures:
+  totalCount: "@body jsonpath $.total"
+  pageCount: "@body jsonpath $.page"
+  statusCode: "@status"
+
+Asserts:
+  "status code is 200": "@status |==| 200"
+  "response is array": "@body jsonpath $.users"
+  "has pagination info": "@body jsonpath $.pagination"
+
+Options:
+  timeout: 30
+  insecure: false

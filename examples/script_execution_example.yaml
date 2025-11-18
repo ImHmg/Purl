@@ -1,0 +1,163 @@
+# Script Execution Example
+# Demonstrates PreExec and PostExec with all available features
+
+PreExec: |
+  # ============================================
+  # PreExec: Runs after Define section
+  # ============================================
+  
+  print("\n=== PreExec Script Started ===")
+  
+  # 1. Access faker to generate test data
+  print("\n1. Generating fake data with faker:")
+  test_email = faker.email()
+  test_name = faker.name()
+  test_phone = faker.phone_number()
+  test_uuid = faker.uuid4()
+  
+  print(f"   Email: {test_email}")
+  print(f"   Name: {test_name}")
+  print(f"   Phone: {test_phone}")
+  print(f"   UUID: {test_uuid}")
+  
+  # 2. Store variables using set_var()
+  print("\n2. Storing variables with set_var():")
+  set_var('generated_email', test_email)
+  set_var('generated_name', test_name)
+  set_var('generated_uuid', test_uuid)
+  set_var('pre_exec_timestamp', faker.iso8601())
+  print("   ✓ Variables stored successfully")
+  
+  # 3. Read variables using get_var()
+  print("\n3. Reading variables with get_var():")
+  user_id = get_var('userId')  # From Define section
+  base_url = get_var('base_url')  # From config/pvars
+  print(f"   userId from Define: {user_id}")
+  print(f"   base_url from config: {base_url}")
+  
+  # 4. Access spec object
+  print("\n4. Accessing spec object:")
+  print(f"   Method: {spec.get('Method')}")
+  print(f"   Endpoint: {spec.get('Endpoint')}")
+  print(f"   Define section: {spec.get('Define', {})}")
+  
+  # 5. Use json module
+  print("\n5. Using json module:")
+  import json
+  data = {'status': 'pre_exec_complete', 'timestamp': faker.iso8601()}
+  json_str = json.dumps(data, indent=2)
+  set_var('pre_exec_data', json_str)
+  print(f"   JSON data: {json_str}")
+  
+  # 6. Use re module
+  print("\n6. Using re module:")
+  import re
+  endpoint = spec.get('Endpoint', '')
+  if re.search(r'/users/', endpoint):
+      print("   ✓ Endpoint contains '/users/'")
+  
+  print("\n=== PreExec Script Completed ===\n")
+
+Define:
+  userId: "user_12345"
+  action: "test_script_execution"
+
+Method: GET
+Endpoint: ${base_url}/api/v1/users/${userId}
+
+QueryParams:
+  include: profile,preferences
+  format: json
+  test_email: ${generated_email}
+
+Headers:
+  Authorization: ${authorization_token}
+  Accept: application/json
+  X-Request-ID: ${generated_uuid}
+  X-Test-Name: ${generated_name}
+
+Captures:
+  userId: "@body jsonpath $.id"
+  userName: "@body jsonpath $.name"
+  userEmail: "@body jsonpath $.email"
+  statusCode: "@status"
+
+Asserts:
+  "status code is 200": "@status |==| 200"
+  "response has user id": "@body jsonpath $.id"
+
+Options:
+  timeout: 30
+  insecure: false
+
+PostExec: |
+  # ============================================
+  # PostExec: Runs after everything is done
+  # ============================================
+  
+  print("\n=== PostExec Script Started ===")
+  
+  # 1. Retrieve variables set in PreExec
+  print("\n1. Retrieving variables from PreExec:")
+  pre_email = get_var('generated_email')
+  pre_name = get_var('generated_name')
+  pre_uuid = get_var('generated_uuid')
+  pre_timestamp = get_var('pre_exec_timestamp')
+  
+  print(f"   Email: {pre_email}")
+  print(f"   Name: {pre_name}")
+  print(f"   UUID: {pre_uuid}")
+  print(f"   Timestamp: {pre_timestamp}")
+  
+  # 2. Access captured variables
+  print("\n2. Accessing captured variables:")
+  captured_user_id = get_var('userId')
+  captured_status = get_var('statusCode')
+  print(f"   Captured userId: {captured_user_id}")
+  print(f"   Captured statusCode: {captured_status}")
+  
+  # 3. Access spec to read final configuration
+  print("\n3. Accessing final spec:")
+  print(f"   Method: {spec.get('Method')}")
+  print(f"   Endpoint: {spec.get('Endpoint')}")
+  print(f"   Headers: {list(spec.get('Headers', {}).keys())}")
+  
+  # 4. Generate new data for next requests
+  print("\n4. Generating data for next request:")
+  next_request_id = faker.uuid4()
+  next_timestamp = faker.iso8601()
+  set_var('next_request_id', next_request_id)
+  set_var('last_execution_time', next_timestamp)
+  print(f"   Next request ID: {next_request_id}")
+  print(f"   Execution time: {next_timestamp}")
+  
+  # 5. Conditional logic based on response
+  print("\n5. Conditional logic:")
+  if captured_status == '200':
+      print("   ✓ Request was successful")
+      set_var('last_success_time', faker.iso8601())
+      set_var('last_success_user', captured_user_id)
+  else:
+      print(f"   ✗ Request failed with status: {captured_status}")
+  
+  # 6. Data transformation
+  print("\n6. Data transformation:")
+  import json
+  pre_data = get_var('pre_exec_data')
+  if pre_data:
+      data = json.loads(pre_data)
+      data['post_exec_status'] = 'completed'
+      data['final_timestamp'] = faker.iso8601()
+      set_var('final_execution_data', json.dumps(data, indent=2))
+      print(f"   Transformed data stored")
+  
+  # 7. Summary
+  print("\n7. Execution Summary:")
+  print(f"   Request Method: {spec.get('Method')}")
+  print(f"   Response Status: {captured_status}")
+  print(f"   User ID: {captured_user_id}")
+  print(f"   Test Email Used: {pre_email}")
+  print(f"   Variables Stored: generated_email, generated_name, generated_uuid,")
+  print(f"                     next_request_id, last_execution_time")
+  
+  print("\n=== PostExec Script Completed ===\n")
