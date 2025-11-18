@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="purl-cli",
+    name="purl",
     version="0.1.0",
     author="Your Name",
     description="A command-line tool for HTTP request testing with YAML configuration",
@@ -29,6 +29,10 @@ setup(
         "pyyaml>=6.0",
         "faker>=18.0.0",
         "termcolor>=2.3.0",
+        "requests>=2.31.0",
+        "requests_toolbelt>=0.9.1",
+        "jsonpath-ng>=1.6.0",
+        "lxml>=4.9.0",
     ],
     entry_points={
         "console_scripts": [
