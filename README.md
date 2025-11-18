@@ -30,19 +30,28 @@ pip install -r requirements.txt
 ### 1. Initialize Project
 
 ```bash
+# Basic init
 purl --init
+
+# Init and create a dev config + sample requests
+purl --init -c dev
 ```
 
-This creates the `.purl/` directory structure:
+This creates the project structure in the current directory:
 ```
-.purl/
-├── configs/          # Environment configuration files
-└── pvars.properties  # Persistent variables storage
+./
+├── .purl/
+│   ├── pcfg.properties   # purl configuration
+│   └── pvars.properties  # Persistent variables storage
+├── configs/
+│   └── dev.properties    # Created when you pass -c dev
+├── sample.yaml           # Sample GET request
+└── sample-post.yaml      # Sample POST request
 ```
 
 ### 2. Create Configuration File
 
-Create `.purl/configs/dev.properties`:
+If you didn't create it during init, create `configs/dev.properties`:
 ```properties
 base_url=http://localhost:3000
 authorization_token=Bearer dev_auth_token_12345
@@ -547,7 +556,7 @@ purl request.yaml -c dev --timeout 120
 ```
 
 ### Variable Not Found
-- Check variable priority: CLI > Configs > pvars > Define
+- Check variable priority: Define > CLI > Configs > pvars
 - Verify config file exists in `.purl/configs/`
 - Check variable name spelling and case sensitivity
 
