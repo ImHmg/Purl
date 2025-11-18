@@ -1,0 +1,53 @@
+# POST Request with Text Body
+# Usage: purl samples/04_post_with_text_body.yaml -c dev
+
+Define:
+  event_id: "${fake.uuid4()}"
+  event_timestamp: "${fake.iso8601()}"
+
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/webhooks/events
+
+Headers:
+  Authorization: ${authorization_token}
+  Content-Type: text/plain
+  Accept: application/json
+  X-Request-ID: ${fake.uuid4()}
+  X-Event-ID: ${event_id}
+
+TextBody: |
+  Event-Type: user.created
+  Event-ID: ${event_id}
+  Timestamp: ${event_timestamp}
+  Source: purl-cli
+  Environment: development
+  
+  User Details:
+  - Name: ${fake.name()}
+  - Email: ${fake.email()}
+  - Phone: ${fake.phone_number()}
+  - Company: ${fake.company()}
+  
+  Action: New user registration completed successfully
+  Status: active
+  Priority: normal
+  
+  Additional Info:
+  Generated via purl testing tool
+  API Version: ${api_version}
+  Base URL: ${base_url}
+
+Captures:
+  webhook_id: "@body jsonpath $.webhook_id"
+  webhook_status: "@body jsonpath $.status"
+  event_id_response: "@body jsonpath $.event_id"
+  status_code: "@status"
+
+Asserts:
+  "status code is 202 or 200": "@status |==| 202"
+  "has webhook id": "@body jsonpath $.webhook_id"
+  "status is accepted": "@body jsonpath $.status |==| accepted"
+
+Options:
+  timeout: ${default_timeout}
+  insecure: false

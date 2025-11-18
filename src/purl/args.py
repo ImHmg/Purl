@@ -62,18 +62,25 @@ def create_argument_parser() -> argparse.ArgumentParser:
         description='HTTP request testing tool with YAML configuration',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\nExamples:
-  purl request.yaml                              # Run single request
-  purl request.yaml -c uat                       # Run with 'uat' config
-  purl request.yaml -c uat --timeout 50          # Set request timeout to 50 seconds
-  purl request.yaml -c uat --insecure            # Disable SSL verification
-  purl request.yaml --var email=test@example.com # Override variable
-  purl request.yaml --var user=john --var id=123 # Multiple variable overrides
-  purl request.yaml -g                           # Generate fake data without executing
-  purl request.yaml --debug                      # Run with debug mode enabled
-  purl --init                                    # Initialize project structure
-  purl --init -c dev uat prod                    # Initialize with multiple configs
-  
-For more information, visit: https://github.com/yourusername/purl
+  purl request.yaml                                      # Execute single request
+  purl request.yaml -c dev                               # Execute with 'dev' config
+  purl request.yaml -c dev -c local                      # Multiple configs (later overrides earlier)
+  purl request.yaml -c dev --var user_id=123             # Override single variable
+  purl request.yaml -c dev --var email=test@example.com --var user_id=999
+                                                         # Override multiple variables
+  purl request.yaml -c dev --timeout 60                  # Set timeout to 60 seconds
+  purl request.yaml -c dev --insecure                    # Disable SSL verification
+  purl request.yaml -c dev --timeout 60 --insecure       # Combine timeout and insecure
+  purl request.yaml -c dev -g                            # Generate cURL command (don't execute)
+  purl request.yaml -c dev --generate                    # Same as -g
+  purl request.yaml -c dev --debug                       # Enable debug mode
+  purl request.yaml -w /path/to/project                  # Set working directory
+  purl --init                                            # Initialize project structure
+  purl --init -c dev uat prod                            # Initialize with config files
+  purl --version                                         # Show version
+  purl --help                                            # Show this help message
+
+For more information, visit: https://github.com/ImHmg/Purl
         """
     )
     
@@ -82,6 +89,19 @@ For more information, visit: https://github.com/yourusername/purl
         nargs='*',
         metavar='REQUEST_FILE',
         help='Path(s) to request YAML file(s). Multiple files will be executed sequentially.'
+    )
+
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f'%(prog)s {__version__}'
+    )
+    
+    parser.add_argument(
+        '--init',
+        action='store_true',
+        dest='init',
+        help='Initialize project directory structure with sample files'
     )
     
     parser.add_argument(
@@ -92,18 +112,6 @@ For more information, visit: https://github.com/yourusername/purl
         help='Configuration name(s). Multiple configs can be specified, with later ones having higher priority.'
     )
     
-    parser.add_argument(
-        '-v', '--version',
-        action='version',
-        version=f'%(prog)s {__version__}'
-    )
-    
-    parser.add_argument(
-        '-w', '--working-dir',
-        dest='working_dir',
-        metavar='DIR',
-        help='Working directory (default: current directory)'
-    )
     
     parser.add_argument(
         '--timeout',
@@ -128,12 +136,7 @@ For more information, visit: https://github.com/yourusername/purl
         help='Override variable (can be specified multiple times)'
     )
     
-    parser.add_argument(
-        '--init',
-        action='store_true',
-        dest='init',
-        help='Initialize project directory structure with sample files'
-    )
+
     
     parser.add_argument(
         '-g', '--generate',
@@ -147,6 +150,13 @@ For more information, visit: https://github.com/yourusername/purl
         action='store_true',
         dest='debug',
         help='Enable debug mode with verbose output'
+    )
+
+    parser.add_argument(
+        '-w', '--working-dir',
+        dest='working_dir',
+        metavar='DIR',
+        help='Working directory (default: current directory)'
     )
     
     return parser

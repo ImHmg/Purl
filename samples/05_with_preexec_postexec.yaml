@@ -1,0 +1,191 @@
+# Request with PreExec and PostExec Scripts
+# Usage: purl samples/05_with_preexec_postexec.yaml -c dev
+# Demonstrates: set_var(), get_var(), faker usage, and script execution
+
+PreExec: |
+  # ============================================
+  # PreExec: Executed after Define section
+  # ============================================
+  
+  print("\n=== PreExec Script Started ===")
+  
+  # 1. Generate fake data using faker
+  print("\n1. Generating fake data:")
+  random_username = faker.user_name()
+  random_email = faker.email()
+  random_company = faker.company()
+  random_phone = faker.phone_number()
+  random_uuid = faker.uuid4()
+  
+  print(f"   Username: {random_username}")
+  print(f"   Email: {random_email}")
+  print(f"   Company: {random_company}")
+  
+  # 2. Store variables using set_var()
+  print("\n2. Storing variables with set_var():")
+  set_var('dynamic_username', random_username)
+  set_var('dynamic_email', random_email)
+  set_var('dynamic_company', random_company)
+  set_var('dynamic_phone', random_phone)
+  set_var('dynamic_uuid', random_uuid)
+  set_var('pre_exec_timestamp', faker.iso8601())
+  print("   ✓ All variables stored successfully")
+  
+  # 3. Read existing variables using get_var()
+  print("\n3. Reading existing variables with get_var():")
+  base_url = get_var('base_url')
+  api_version = get_var('api_version')
+  print(f"   base_url: {base_url}")
+  print(f"   api_version: {api_version}")
+  
+  # 4. Generate transaction ID
+  import time
+  transaction_id = f"TXN-{int(time.time())}-{faker.random_number(digits=6)}"
+  set_var('transaction_id', transaction_id)
+  print(f"\n4. Generated transaction ID: {transaction_id}")
+  
+  # 5. Access spec object
+  print("\n5. Accessing spec object:")
+  print(f"   Method: {spec.get('Method')}")
+  print(f"   Endpoint: {spec.get('Endpoint')}")
+  
+  print("\n=== PreExec Script Completed ===\n")
+
+Define:
+  request_id: "${fake.uuid4()}"
+
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/users
+
+Headers:
+  Authorization: ${authorization_token}
+  Content-Type: application/json
+  Accept: application/json
+  X-Request-ID: ${request_id}
+  X-Transaction-ID: ${transaction_id}
+  X-Generated-By: purl-preexec
+
+JsonBody: |
+  {
+    "username": "${dynamic_username}",
+    "email": "${dynamic_email}",
+    "phone": "${dynamic_phone}",
+    "company": "${dynamic_company}",
+    "profile": {
+      "bio": "${fake.text()}",
+      "website": "${fake.url()}",
+      "avatar": "${fake.image_url()}"
+    },
+    "address": {
+      "street": "${fake.street_address()}",
+      "city": "${fake.city()}",
+      "state": "${fake.state()}",
+      "zip": "${fake.zipcode()}"
+    },
+    "metadata": {
+      "request_id": "${request_id}",
+      "transaction_id": "${transaction_id}",
+      "timestamp": "${pre_exec_timestamp}",
+      "source": "purl-cli",
+      "generated_uuid": "${dynamic_uuid}"
+    }
+  }
+
+Captures:
+  created_user_id: "@body jsonpath $.id"
+  created_user_email: "@body jsonpath $.email"
+  created_user_username: "@body jsonpath $.username"
+  status_code: "@status"
+  response_time: "@time"
+
+Asserts:
+  "status code is 201": "@status |==| 201"
+  "response has user id": "@body jsonpath $.id"
+  "email matches": "@body jsonpath $.email |==| ${dynamic_email}"
+  "username matches": "@body jsonpath $.username |==| ${dynamic_username}"
+
+Options:
+  timeout: ${default_timeout}
+  insecure: false
+
+PostExec: |
+  # ============================================
+  # PostExec: Executed after everything is done
+  # ============================================
+  
+  print("\n=== PostExec Script Started ===")
+  
+  # 1. Retrieve variables set in PreExec
+  print("\n1. Retrieving variables from PreExec:")
+  pre_username = get_var('dynamic_username')
+  pre_email = get_var('dynamic_email')
+  pre_company = get_var('dynamic_company')
+  transaction_id = get_var('transaction_id')
+  pre_timestamp = get_var('pre_exec_timestamp')
+  
+  print(f"   Username: {pre_username}")
+  print(f"   Email: {pre_email}")
+  print(f"   Company: {pre_company}")
+  print(f"   Transaction ID: {transaction_id}")
+  
+  # 2. Access captured variables from response
+  print("\n2. Accessing captured variables:")
+  user_id = get_var('created_user_id')
+  user_email = get_var('created_user_email')
+  status_code = get_var('status_code')
+  response_time = get_var('response_time')
+  
+  print(f"   Created User ID: {user_id}")
+  print(f"   Created User Email: {user_email}")
+  print(f"   Status Code: {status_code}")
+  print(f"   Response Time: {response_time}ms")
+  
+  # 3. Conditional logic based on response
+  print("\n3. Conditional logic:")
+  if status_code == '201':
+      print("   ✓ User created successfully!")
+      set_var('last_success_user_id', user_id)
+      set_var('last_success_email', user_email)
+      set_var('last_success_time', faker.iso8601())
+  else:
+      print(f"   ✗ User creation failed with status: {status_code}")
+  
+  # 4. Generate data for next request
+  print("\n4. Generating data for next request:")
+  next_request_id = faker.uuid4()
+  next_timestamp = faker.iso8601()
+  set_var('next_request_id', next_request_id)
+  set_var('last_execution_time', next_timestamp)
+  print(f"   Next request ID: {next_request_id}")
+  
+  # 5. Create summary JSON
+  print("\n5. Creating execution summary:")
+  import json
+  summary = {
+      'transaction_id': transaction_id,
+      'user_id': user_id,
+      'email': user_email,
+      'username': pre_username,
+      'status_code': status_code,
+      'response_time_ms': response_time,
+      'pre_exec_timestamp': pre_timestamp,
+      'post_exec_timestamp': faker.iso8601()
+  }
+  summary_json = json.dumps(summary, indent=2)
+  set_var('execution_summary', summary_json)
+  print(f"   Summary stored in 'execution_summary' variable")
+  
+  # 6. Final summary
+  print("\n6. Execution Summary:")
+  print(f"   ═══════════════════════════════════════")
+  print(f"   Request Method: {spec.get('Method')}")
+  print(f"   Endpoint: {spec.get('Endpoint')}")
+  print(f"   Transaction ID: {transaction_id}")
+  print(f"   Created User ID: {user_id}")
+  print(f"   User Email: {user_email}")
+  print(f"   Username: {pre_username}")
+  print(f"   Status Code: {status_code}")
+  print(f"   Response Time: {response_time}ms")
+  print(f"   ═══════════════════════════════════════")
+  
+  print("\n=== PostExec Script Completed ===\n")

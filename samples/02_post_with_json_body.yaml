@@ -1,0 +1,62 @@
+# POST Request with JSON Body
+# Usage: purl samples/02_post_with_json_body.yaml -c dev
+
+Define:
+  user_name: "${fake.name()}"
+  user_email: "${fake.email()}"
+  user_phone: "${fake.phone_number()}"
+
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/users
+
+Headers:
+  Authorization: ${authorization_token}
+  Content-Type: application/json
+  Accept: application/json
+  X-Request-ID: ${fake.uuid4()}
+
+JsonBody: |
+  {
+    "name": "${user_name}",
+    "email": "${user_email}",
+    "phone": "${user_phone}",
+    "age": 28,
+    "address": {
+      "street": "${fake.street_address()}",
+      "city": "${fake.city()}",
+      "state": "${fake.state()}",
+      "zip": "${fake.zipcode()}",
+      "country": "USA"
+    },
+    "profile": {
+      "bio": "${fake.text()}",
+      "website": "${fake.url()}",
+      "company": "${fake.company()}"
+    },
+    "preferences": {
+      "theme": "dark",
+      "notifications": true,
+      "language": "en"
+    },
+    "metadata": {
+      "created_at": "${fake.iso8601()}",
+      "source": "purl-cli",
+      "version": "1.0"
+    }
+  }
+
+Captures:
+  created_user_id: "@body jsonpath $.id"
+  created_user_email: "@body jsonpath $.email"
+  created_user_name: "@body jsonpath $.name"
+  status_code: "@status"
+
+Asserts:
+  "status code is 201": "@status |==| 201"
+  "response has user id": "@body jsonpath $.id"
+  "email matches": "@body jsonpath $.email |==| ${user_email}"
+  "name matches": "@body jsonpath $.name |==| ${user_name}"
+
+Options:
+  timeout: ${default_timeout}
+  insecure: false

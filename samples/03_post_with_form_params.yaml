@@ -1,0 +1,40 @@
+# POST Request with Form Parameters
+# Usage: purl samples/03_post_with_form_params.yaml -c dev
+
+Define:
+  username: "testuser@example.com"
+  password: "secure_password_123"
+
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/auth/login
+
+Headers:
+  Accept: application/json
+  X-Request-ID: ${fake.uuid4()}
+  X-Device-ID: ${fake.uuid4()}
+
+FormBody:
+  username: ${username}
+  password: ${password}
+  grant_type: password
+  client_id: purl_client
+  remember_me: true
+  device_name: purl-cli
+  device_type: desktop
+
+Captures:
+  access_token: "@body jsonpath $.access_token"
+  refresh_token: "@body jsonpath $.refresh_token"
+  token_type: "@body jsonpath $.token_type"
+  expires_in: "@body jsonpath $.expires_in"
+  status_code: "@status"
+
+Asserts:
+  "status code is 200": "@status |==| 200"
+  "has access token": "@body jsonpath $.access_token"
+  "has refresh token": "@body jsonpath $.refresh_token"
+  "token type is Bearer": "@body jsonpath $.token_type |==| Bearer"
+
+Options:
+  timeout: ${default_timeout}
+  insecure: false

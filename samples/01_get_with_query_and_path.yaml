@@ -1,0 +1,41 @@
+# GET Request with Query Parameters and Path Parameters
+# Usage: purl samples/01_get_with_query_and_path.yaml -c dev
+# Usage with variable override: purl samples/01_get_with_query_and_path.yaml -c dev --var user_id=5678
+
+Define:
+  user_id: "12345"
+  page_number: "1"
+
+Method: GET
+Endpoint: ${base_url}/api/${api_version}/users/${user_id}
+
+QueryParams:
+  page: ${page_number}
+  limit: ${page_size}
+  sort: created_at
+  order: desc
+  include: profile,settings
+  format: json
+
+Headers:
+  Authorization: ${authorization_token}
+  Accept: application/json
+  X-Request-ID: ${fake.uuid4()}
+  X-Client-Version: 1.0.0
+
+Captures:
+  user_id: "@body jsonpath $.id"
+  user_name: "@body jsonpath $.name"
+  user_email: "@body jsonpath $.email"
+  status_code: "@status"
+  response_time: "@time"
+
+Asserts:
+  "status code is 200": "@status |==| 200"
+  "response has user id": "@body jsonpath $.id"
+  "response has name": "@body jsonpath $.name"
+  "response has email": "@body jsonpath $.email"
+
+Options:
+  timeout: ${default_timeout}
+  insecure: false
