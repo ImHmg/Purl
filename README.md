@@ -1,4 +1,4 @@
-# Purl - Python URL Request Testing Tool
+# Purl - API Testing Tool
 
 A powerful HTTP request testing tool with YAML configuration, variable substitution, fake data generation, and Python scripting capabilities.
 
