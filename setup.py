@@ -6,11 +6,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="purl",
     version="0.1.0",
-    author="Your Name",
+    author="Hasitha Mapalagama",
     description="A command-line tool for HTTP request testing with YAML configuration",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/purl",
+    url="https://github.com/ImHmg/purl",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[

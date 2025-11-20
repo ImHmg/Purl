@@ -71,11 +71,6 @@ JsonBody: |
     "email": "${dynamic_email}",
     "phone": "${dynamic_phone}",
     "company": "${dynamic_company}",
-    "profile": {
-      "bio": "${fake.text()}",
-      "website": "${fake.url()}",
-      "avatar": "${fake.image_url()}"
-    },
     "address": {
       "street": "${fake.street_address()}",
       "city": "${fake.city()}",
