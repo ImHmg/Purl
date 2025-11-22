@@ -82,7 +82,7 @@ class HttpClient:
         if self.args.insecure:
             return False
         
-        if self.request_data.get('Options', {}).get('insecure') == False:
+        if self.request_data.get('Options', {}).get('insecure') == True:
             return False
 
         return True
