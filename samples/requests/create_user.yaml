@@ -1,0 +1,31 @@
+# Create user request using CSV-driven variables
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/users
+Status: 201
+
+Headers:
+  Content-Type: application/json
+  Accept: application/json
+  X-Client-Version: ${client_version}
+
+JsonBody: |
+  {
+    "id": "${user_id}",
+    "name": "${user_name}",
+    "email": "${user_email}",
+    "phone": "${user_phone}",
+    "profile": {
+      "plan": "${plan}",
+      "locale": "${locale}"
+    },
+    "preferences": {
+      "newsletter": "${newsletter}"
+    }
+  }
+
+Captures:
+  created_user_id: "@body jsonpath $.id"
+  created_user_email: "@body jsonpath $.email"
+
+Asserts:
+  email matches payload: "@body jsonpath $.email |==| ${user_email}"

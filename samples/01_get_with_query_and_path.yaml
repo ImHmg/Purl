@@ -8,6 +8,7 @@ Define:
 
 Method: GET
 Endpoint: ${base_url}/api/${api_version}/users/${user_id}
+Status: 200
 
 QueryParams:
   page: ${page_number}

@@ -33,10 +33,12 @@ class PurlArgs:
         self.init_configs: List[str] = []
         self.generate: bool = False
         self.debug: bool = False
+        self.suite_file: Optional[str] = None
     
     def set_args(self, request_files: List[str], config_names: List[str] = None, working_dir: str = None,
                  timeout: int = None, insecure: bool = False, variables: dict = None,
-                 init: bool = False, init_configs: List[str] = None, generate: bool = False, debug: bool = False):
+                 init: bool = False, init_configs: List[str] = None, generate: bool = False, debug: bool = False,
+                 suite_file: Optional[str] = None):
         """Set parsed arguments"""
         self.request_files = request_files
         self.config_names = config_names or []
@@ -48,6 +50,7 @@ class PurlArgs:
         self.init_configs = init_configs or []
         self.generate = generate
         self.debug = debug
+        self.suite_file = suite_file
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -89,6 +92,13 @@ For more information, visit: https://github.com/ImHmg/Purl
         nargs='*',
         metavar='REQUEST_FILE',
         help='Path(s) to request YAML file(s). Multiple files will be executed sequentially.'
+    )
+
+    parser.add_argument(
+        '-s', '--suite',
+        dest='suite_file',
+        metavar='SUITE_FILE',
+        help='Path to suite YAML file'
     )
 
     parser.add_argument(
@@ -201,7 +211,8 @@ def parse_arguments(args: List[str] = None) -> PurlArgs:
         init=parsed.init,
         init_configs=init_configs,
         generate=parsed.generate,
-        debug=parsed.debug
+        debug=parsed.debug,
+        suite_file=parsed.suite_file
     )
     
     return purl_args

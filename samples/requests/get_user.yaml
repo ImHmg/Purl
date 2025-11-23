@@ -1,0 +1,10 @@
+# Get single user created via previous request
+Method: GET
+Endpoint: ${base_url}/api/${api_version}/users/${created_user_id}
+
+Headers:
+  Accept: application/json
+
+Asserts:
+  status is 200: "@status |==| 200"
+  id matches captured: "@body jsonpath $.id |==| ${created_user_id}"

@@ -62,9 +62,20 @@ class ResponseProcessor:
                 'op': Optional[str]
             }
         """
+        results: Dict[str, Dict[str, Any]] = {} 
+        
+        status = self.http_client.request_data.get('Status', None)
+        if status is not None:
+            results['Response Status'] = {
+                'pass': self.response.status_code == status,
+                'actual': self.response.status_code,
+                'expected': status,
+                'op': "==",
+            }
+        
         asserts_config = self.http_client.request_data.get('Asserts', {})
 
-        results: Dict[str, Dict[str, Any]] = {}
+        
         if not asserts_config:
             return results
 

@@ -110,4 +110,12 @@ class RequestProcessor:
         if post_exec_script:
             self.script_executor.execute(post_exec_script, final_data, "PostExec")
         
-        return final_data
+        return {
+            "status" : "complete",
+            "file": request_file,
+            "asserts": asserts,
+            "captures": captures,
+            "response": http_client.response,
+            "request" : http_client.request,
+            "request_spec": final_data
+        }

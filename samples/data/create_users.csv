@@ -1,0 +1,4 @@
+user_id,user_name,user_email,user_phone,plan,locale,newsletter
+user_1001,Alice Example,alice@example.com,5551112222,premium,en-US,true
+user_1002,Bob Example,bob@example.com,5553334444,standard,en-GB,false
+user_1003,Carol Example,carol@example.com,5556667777,trial,en-AU,true

@@ -1,0 +1,14 @@
+# List users with pagination inputs from CSV
+Method: GET
+Endpoint: ${base_url}/api/${api_version}/users
+
+QueryParams:
+  page: ${page}
+  limit: ${limit}
+
+Headers:
+  Accept: application/json
+
+Asserts:
+  status is 200: "@status |==| 200"
+  has pagination object: "@body jsonpath $.pagination"

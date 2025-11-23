@@ -115,6 +115,7 @@ class HttpClient:
         if timeout is not None:
             request_kwargs['timeout'] = timeout
         
+        self.request = request_kwargs
         # Execute request and track time
         start_time = time.time()
         self.response = requests.request(method, **request_kwargs)

@@ -1,0 +1,20 @@
+Name: Suite 1
+
+
+DataSources: users.csv
+
+Vars:
+  base_url: "https://api.example.com"
+  api_version: "v1"
+
+Configs:
+  - dev
+  - uat
+
+Requests:
+  - 01_get_with_query_and_path.yaml
+  - 02_post_with_json_body.yaml
+
+Options:
+  timeout: 10
+  insecure: true

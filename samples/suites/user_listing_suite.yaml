@@ -1,0 +1,15 @@
+Name: User Listing Suite
+
+DataSources: ../data/list_users.csv
+
+Configs:
+  - dev
+
+Vars:
+  api_version: v1
+
+Requests:
+  - ../requests/list_users.yaml
+
+Options:
+  timeout: 30

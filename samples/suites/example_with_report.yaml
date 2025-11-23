@@ -1,0 +1,23 @@
+Name: Example Suite with Custom Report
+ReportPath: reports/example_suite_report.html
+
+# Optional: Specify custom report path
+# If not provided, report will be saved to .purl/reports/{suite_name}_{timestamp}.html
+# Relative paths are resolved from working directory
+# Absolute paths are used as-is
+
+DataSources: ../data/create_users.csv
+
+Configs:
+  - dev
+
+Vars:
+  api_version: v1
+  client_version: 1.0.0
+
+Requests:
+  - ../requests/create_user.yaml
+  - ../requests/get_user.yaml
+
+Options:
+  timeout: 30
