@@ -52,15 +52,8 @@ class ColoredOutput:
     def method_colored(method: str) -> str:
         """Get colored method string"""
         method_upper = method.upper()
-        color_map = {
-            'GET': 'green',
-            'POST': 'yellow',
-            'PUT': 'blue',
-            'DELETE': 'red',
-            'PATCH': 'cyan',
-        }
-        color = color_map.get(method_upper, 'white')
-        return colored(method_upper, color, attrs=['bold'])
+        # Use a uniform style so every method looks consistent
+        return colored(' ' + method_upper + ' ', 'white', 'on_magenta', attrs=['bold'])
     
     @staticmethod
     def section_header(title: str) -> None:
@@ -191,13 +184,13 @@ def print_http_request(http_client) -> None:
     """
     from .http_client import HttpClient
     
-    ColoredOutput.separator("=", 80, 'cyan')
-    cprint(" HTTP REQUEST ", 'white', 'on_cyan', attrs=['bold'])
+    ColoredOutput.separator("-", 80, 'red')
+    http_header =colored(" REQUEST ", 'white', 'on_cyan', attrs=['bold'])
     
     # Print method and URL
-    method = http_client.get_method()
-    url = http_client.get_url()
-    print(f"{ColoredOutput.method_colored(method)} {colored(url, 'white', attrs=['bold'])}")
+    method = colored(' ' + http_client.get_method().upper() + ' ', 'white', 'on_light_yellow', attrs=['bold']) 
+    url = colored(http_client.get_url(), 'white', attrs=['bold'])
+    print(f"{http_header}{method} {url}")
     
     # Print query parameters
     query_params = http_client.get_query_params()
@@ -263,17 +256,16 @@ def print_http_response(http_client) -> None:
     # Print status code with description
     status_code = response.status_code
     status_text = HTTP_STATUS_CODES.get(str(status_code), "Unknown")
-    status_color = get_status_color(status_code)
+    status_line = f" {status_code} {status_text} "
     
     # Build the response header line with timing
-    response_header = colored(" HTTP RESPONSE ", 'white', 'on_light_green', attrs=['bold'])
+    response_header = colored(" RESPONSE ", 'white', 'on_light_green', attrs=['bold'])
     time_info = colored(f" [{http_client.elapsed_time:.2f} ms] ", 'white', 'on_grey', attrs=['bold'])
-    
-    print(response_header + time_info)
+
     
     # Print status code below
-    status_line = f"{status_code} {status_text}"
-    print(colored(status_line, status_color, attrs=['bold']))
+    status_colored = colored(status_line, 'white', 'on_dark_grey', attrs=['bold'])
+    print( response_header + status_colored + time_info)
     
     # Print response body
     ColoredOutput.section_header("Response Body")

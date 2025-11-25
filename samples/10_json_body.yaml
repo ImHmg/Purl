@@ -1,0 +1,18 @@
+Name: JSON Body Request
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/users
+Status: 201
+
+Headers:
+  X-Client-Version: ${client_version}
+
+JsonBody: |
+  {
+    "id": "${user_id}",
+    "name": "${user_name}",
+    "email": "${user_email}",
+    "phone": "${user_phone}",
+    "profile": {
+      "locale": "${locale}"
+    }
+  }

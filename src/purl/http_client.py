@@ -45,7 +45,13 @@ class HttpClient:
         if 'Body' in self.request_data:
             return 'data', self.request_data['Body']
         elif 'JsonBody' in self.request_data:
-            return 'json', self.request_data['JsonBody']
+            json_body = self.request_data['JsonBody']
+            if isinstance(json_body, str):
+                try:
+                    json_body = json.loads(json_body)
+                except json.JSONDecodeError:
+                    pass
+            return 'json', json_body
         elif 'FormBody' in self.request_data:
             return 'data', self.request_data['FormBody']
         elif 'TextBody' in self.request_data:

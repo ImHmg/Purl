@@ -1,0 +1,17 @@
+Name: JSON Body Request
+Method: POST
+Endpoint: ${base_url}/api/${api_version}/users
+Status: 200
+
+Headers:
+  X-Client-Version: ${client_version}
+
+FormBody:
+  user_id: ${user_id}
+  user_name: ${user_name}
+  user_email: ${user_email}
+  user_phone: ${user_phone}
+  locale: ${locale}
+
+Captures:
+  user_id: "@body jsonpath $.id"
