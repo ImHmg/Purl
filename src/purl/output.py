@@ -185,11 +185,12 @@ def print_http_request(http_client) -> None:
     from .http_client import HttpClient
     
     ColoredOutput.separator("-", 80, 'red')
-    http_header =colored(" REQUEST ", 'white', 'on_cyan', attrs=['bold'])
+    http_header = colored("  ", 'white', 'on_blue', attrs=['bold']) + colored(" REQUEST ", 'black', 'on_white', attrs=['bold'])
     
     # Print method and URL
-    method = colored(' ' + http_client.get_method().upper() + ' ', 'white', 'on_light_yellow', attrs=['bold']) 
+    method = colored(' ' + http_client.get_method().upper() + ' ', 'white', 'on_magenta', attrs=['bold']) 
     url = colored(http_client.get_url(), 'white', attrs=['bold'])
+
     print(f"{http_header}{method} {url}")
     
     # Print query parameters
@@ -259,8 +260,8 @@ def print_http_response(http_client) -> None:
     status_line = f" {status_code} {status_text} "
     
     # Build the response header line with timing
-    response_header = colored(" RESPONSE ", 'white', 'on_light_green', attrs=['bold'])
-    time_info = colored(f" [{http_client.elapsed_time:.2f} ms] ", 'white', 'on_grey', attrs=['bold'])
+    response_header = colored("  ", 'black', 'on_green', attrs=['bold']) + colored(" RESPONSE ", 'black', 'on_white', attrs=['bold'])
+    time_info = colored(f"[{http_client.elapsed_time:.2f} ms] ", 'white', 'on_dark_grey')
 
     
     # Print status code below
