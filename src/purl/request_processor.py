@@ -5,7 +5,6 @@ Request processor - orchestrates parsing, variable resolution, and request prepa
 from typing import List, Dict, Any
 import json
 
-from .parser import RequestParser
 from .app_manager import AppManager
 from .variables import VariableResolver, VariableContext
 from .output import ColoredOutput, format_json_colored, format_dict_colored, print_http_request, print_http_response, print_captures, print_asserts
