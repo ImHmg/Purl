@@ -1,0 +1,36 @@
+# Sample POST Request
+Define:
+  title: Sample Post Title
+  body: This is a sample post body
+  userId: 1
+  userEmail: "${fake.email()}"
+
+Method: POST
+Endpoint: https://jsonplaceholder.typicode.com/posts
+
+Headers:
+  Content-Type: application/json
+  Accept: application/json
+  X-Request-ID: "${fake.uuid4()}"
+
+JsonBody: |
+  {
+    "title": "${title}",
+    "body": "${body}",
+    "userId": ${userId},
+    "email": "${userEmail}"
+  }
+
+Captures:
+  postId: "@body jsonpath $.id"
+  createdAt: "@body jsonpath $.createdAt"
+  statusCode: "@status"
+
+Asserts:
+  "status code is 201": "@status |==| 201"
+  "response has id": "@body jsonpath $.id"
+  "title matches": "@body jsonpath $.title |==| ${title}"
+
+Options:
+  timeout: 30
+  insecure: false

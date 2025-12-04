@@ -1,0 +1,27 @@
+# Sample GET Request
+# Documentation: https://github.com/yourusername/purl
+
+Define:
+  userId: 1
+  postId: 1
+
+Method: GET
+Endpoint: https://jsonplaceholder.typicode.com/posts/1
+
+Headers:
+  Accept: application/json
+  User-Agent: purl/1.0
+
+Captures:
+  responseId: "@body jsonpath $.id"
+  responseTitle: "@body jsonpath $.title"
+  statusCode: "@status"
+
+Asserts:
+  "status code is 200": "@status |==| 200"
+  "response has id": "@body jsonpath $.id"
+  "response has title": "@body jsonpath $.title"
+
+Options:
+  timeout: 30
+  insecure: false

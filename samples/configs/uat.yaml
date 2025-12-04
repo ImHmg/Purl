@@ -1,0 +1,7 @@
+# UAT Environment Configuration
+base_url: https://uat-api.example.com
+authorization_token: Bearer uat_auth_token_secure_67890
+api_token: uat_token_22222
+api_version: v1
+page_size: 20
+default_timeout: 45

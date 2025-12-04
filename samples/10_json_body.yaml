@@ -16,3 +16,6 @@ JsonBody: |
       "locale": "${locale}"
     }
   }
+
+Captures:
+  id: "@body jsonpath $.id"

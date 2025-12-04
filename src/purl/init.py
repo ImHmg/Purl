@@ -81,23 +81,23 @@ DEFAULT_PVARS = """# Project Variables
 # These variables are available across all requests
 
 # API Configuration
-api_base_url=https://api.example.com
-api_version=v1
+api_base_url: https://api.example.com
+api_version: v1
 
 # Authentication
-api_key=your-api-key-here
-auth_token=your-token-here
+api_key: your-api-key-here
+auth_token: your-token-here
 
 # Common Values
-default_timeout=30
-retry_count=3
+default_timeout: 30
+retry_count: 3
 """
 
 def get_default_pcfg() -> str:
-    """Generate default pcfg.properties content"""
+    """Generate default pcfg.yaml content"""
     return f"""# purl configuration
 # Path to configs directory (relative to project root)
-configs_dir={Config.DEFAULT_CONFIGS_DIR}
+configs_dir: {Config.DEFAULT_CONFIGS_DIR}
 """
 
 
@@ -105,25 +105,25 @@ def create_env_config(env_name: str) -> str:
     """Generate environment-specific configuration content"""
     configs = {
         'dev': """# Development Environment Configuration
-api_base_url=https://dev-api.example.com
-api_version=v1
-environment=development
-debug=true
-timeout=60
+api_base_url: https://dev-api.example.com
+api_version: v1
+environment: development
+debug: true
+timeout: 60
 """,
         'uat': """# UAT Environment Configuration
-api_base_url=https://uat-api.example.com
-api_version=v1
-environment=uat
-debug=false
-timeout=30
+api_base_url: https://uat-api.example.com
+api_version: v1
+environment: uat
+debug: false
+timeout: 30
 """,
         'prod': """# Production Environment Configuration
-api_base_url=https://api.example.com
-api_version=v1
-environment=production
-debug=false
-timeout=30
+api_base_url: https://api.example.com
+api_version: v1
+environment: production
+debug: false
+timeout: 30
 """
     }
     
@@ -132,11 +132,11 @@ timeout=30
         return configs[env_name.lower()]
     else:
         return f"""# {env_name.upper()} Environment Configuration
-api_base_url=https://{env_name}-api.example.com
-api_version=v1
-environment={env_name}
-debug=false
-timeout=30
+api_base_url: https://{env_name}-api.example.com
+api_version: v1
+environment: {env_name}
+debug: false
+timeout: 30
 """
 
 

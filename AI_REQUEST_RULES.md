@@ -1,6 +1,6 @@
-# AI Request Authoring Guide (No Suites)
+# AI Request & Suite Authoring Guide
 
-Use this guide whenever you need to convert a cURL command or a natural-language request description into runnable Purl request files. Everything required is contained here. Treat all paths as relative to the user’s project root.
+Use this guide whenever you need to convert a cURL command or a natural-language request description into runnable Purl request files **or** multi-step suites. Everything required is contained here so GPT can generate ready-to-run assets without extra context. Treat all paths as relative to the user’s project root.
 
 ## 1. Workspace & Folder Rules
 
@@ -206,3 +206,67 @@ purl --version
 8. **Document the command** – Ensure the header comment shows precisely how to run the request with any required configs or variable overrides.
 
 Following this guide ensures AI-generated request files stand on their own, honor configuration rules, and can be executed immediately on any user’s machine.
+
+## 9. Suite Authoring Blueprint
+
+Create a suite when multiple request files must run together while sharing configs, variables, or CSV-driven rows. The folder `samples/suites/` contains working references such as `user_creation_suite.yaml`, `user_listing_suite.yaml`, and `example_with_report.yaml`—mirror their style.
+
+Include the sections below (omit ones that do not apply). Keep key names in TitleCase exactly as shown so the suite runner can parse them.
+
+1. **Name** – Human-friendly label displayed in logs and reports.
+2. **ReportPath** *(optional)* – Relative or absolute path for the HTML summary. If omitted, the report goes to `.purl/reports/{suite_name}_{timestamp}.html`.
+3. **DataSources** – Path (string) or list containing a single CSV file that provides per-row variables. Each header becomes a variable for that run. Example:
+   ```yaml
+   DataSources: ../data/create_users.csv
+   ```
+4. **Configs** – Ordered list of config names. Entries are appended in front of CLI `-c` values, so later configs override earlier ones.
+5. **Vars** – Static key/value pairs pushed into the variable context before any requests run. Use string values only.
+6. **Requests** – Ordered list of request file paths (relative paths resolve from the suite file’s directory). Requests execute sequentially for every CSV row.
+7. **Options** – Per-suite overrides such as `timeout` or `insecure`. They serve as defaults for every request unless the CLI already set them.
+
+Example suite:
+
+```yaml
+Name: User Creation Suite
+ReportPath: reports/example_suite_report.html
+DataSources: ../data/create_users.csv
+Configs:
+  - dev
+Vars:
+  api_version: v1
+  client_version: 1.0.0
+Requests:
+  - ../requests/create_user.yaml
+  - ../requests/get_user.yaml
+Options:
+  timeout: 30
+```
+
+## 10. Linking Requests, DataSources, and Vars
+
+1. **Request linking**
+   - Suites run each listed request in order. Captures defined inside a request are written to the global variable store (`pvars`) and become available to all following requests in the same execution.
+   - Reference earlier captures by name just like any `${variable}` placeholder (e.g., capture `created_user_id` in `create_user.yaml`, then use `${created_user_id}` inside `get_user.yaml`).
+   - Keep capture names unique enough to avoid accidental reuse between suites.
+
+2. **DataSources → Vars**
+   - When `DataSources` points to a CSV, each header/value pair in a row is merged into the variables dictionary (as strings) before the first request runs for that row.
+   - CSV values override Suite `Vars`, which override config values, which override persisted `pvars`.
+   - Empty cells become empty strings; provide defaults via Suite `Vars` if a column can be blank.
+
+3. **Suite Vars best practices**
+   - Use Suite `Vars` for constants shared across all rows (API version, feature flags, etc.).
+   - Names must be valid identifiers (letters, numbers, underscore) so they can appear in `${var_name}` placeholders.
+   - Avoid storing secrets here—prefer configs when values must be hidden outside version control.
+
+4. **Data-driven overrides**
+   - If a CSV column matches a variable already defined in Suite `Vars` or configs, the CSV value wins for that row.
+   - Combine CSV rows with faker-driven Captures to build multi-step flows (e.g., CSV supplies `email_domain`, PreExec builds `email`, captures store `user_id`).
+
+5. **Run command for suites**
+   ```bash
+   purl -s samples/suites/user_creation_suite.yaml -c dev
+   ```
+   Add `--var` overrides or additional `-c` flags exactly like single-request runs.
+
+Document every suite so GPT knows which CSVs, configs, and requests belong together. Provide explicit file paths and commands in prompts so generated suites stay runnable without manual fixes.

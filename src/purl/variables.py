@@ -57,7 +57,7 @@ class VariableContext:
         
         if config_names:
             for config_name in config_names:
-                config_file_path = app_manager.get_config_file_path(config_name + ".properties")
+                config_file_path = app_manager.get_config_file_path(config_name + ".yaml")
                 if not config_file_path.exists():
                     ColoredOutput.error(f"Config not found: {config_file_path}")
                     ColoredOutput.info(f"Available configs should be in: {app_manager.get_configs_dir()}/")
