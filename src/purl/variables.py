@@ -9,6 +9,7 @@ from .output import ColoredOutput
 from .properties import read_properties, write_properties
 from .app_manager import AppManager
 from .args import PurlArgs
+from .yaml_reader import parse_yaml_string
 
 
 class VariableContext:
@@ -67,6 +68,11 @@ class VariableContext:
         
         self.configs = configs
     
+    def load_configs_from_str(self, config_content: str):
+        """Load configs from YAML string"""
+        parsed_config = parse_yaml_string(config_content)
+        self.configs = [parsed_config] if parsed_config else []
+
     def load(self):
         """Load all variables (pvars, configs, and command-line overrides) from args"""
         args = PurlArgs()

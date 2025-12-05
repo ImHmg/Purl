@@ -7,7 +7,8 @@ from .suite_runner import SuiteRunner
 from .args import parse_arguments, PurlArgs
 from .output import ColoredOutput
 from .init import initialize_project
-
+from .app_manager import AppManager
+from .variables import VariableContext
 
 def _handle_init_request(args) -> bool:
     """Run project initialization if requested. Returns True if program should exit."""
@@ -28,6 +29,11 @@ def main():
     args = parse_arguments()
     if _handle_init_request(args):
         return 0 if not getattr(args, 'init_failed', False) else 1
+
+    # Initialize app (create folders/files)
+    AppManager().initialize()
+    # Load variables
+    VariableContext().load()
 
     try:
         if args.suite_file:

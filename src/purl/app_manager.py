@@ -60,10 +60,6 @@ class AppManager:
         """Create empty pvars.properties file"""
         with open(self.pvars_path, 'w', encoding='utf-8') as f:
             f.write("# purl variables file\n")
-            f.write("# Add your variables here in key=value format\n")
-            f.write("# Example:\n")
-            f.write("# base_url=https://api.example.com\n")
-            f.write("# api_key=your_api_key_here\n")
     
     def _create_pcfg_file(self):
         """Create default pcfg.properties file"""

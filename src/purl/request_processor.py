@@ -29,13 +29,9 @@ class RequestProcessor:
     
     def initialize(self):
         """Initialize configuration and load variable sources from args"""
-        # Initialize app (create folders/files)
-        self.app_manager.initialize()
-        
         # Reset and load all variables (including command-line overrides)
-        self.var_context.reset()
-        self.var_context.load()
-        
+        # self.var_context.reset() # TODO: no need to reset  ??
+        # self.var_context.load()
         self._initialized = True
     
     def process_request(self, request_file: str) -> Dict[str, Any]:
