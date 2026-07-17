@@ -37,19 +37,46 @@ class RequestProcessor:
     def process_request(self, request_file: str) -> Dict[str, Any]:
         """
         Process a request file: read -> resolve -> read -> print
-        
+
         Args:
             request_file: Path to the request YAML file
-            
+
+        Returns:
+            Parsed YAML data as dictionary
+        """
+        yaml_content = read_yaml_file(request_file)
+        return self._process(yaml_content, request_file)
+
+    def process_request_text(self, yaml_content: str, label: str) -> Dict[str, Any]:
+        """
+        Process a request whose YAML source is already in memory (e.g. a
+        ``Kind: Request`` document embedded in a suite file) rather than a
+        standalone file on disk.
+
+        Args:
+            yaml_content: Raw YAML text of the request
+            label: Human-readable identifier used for logging/results (e.g. the
+                request's ``Name``), since there is no backing file path
+
+        Returns:
+            Parsed YAML data as dictionary
+        """
+        return self._process(yaml_content, label)
+
+    def _process(self, yaml_content: str, label: str) -> Dict[str, Any]:
+        """
+        Shared processing pipeline for both file-backed and in-memory requests.
+
+        Args:
+            yaml_content: Raw YAML text of the request
+            label: Identifier used in logs/results ('file' key of the result)
+
         Returns:
             Parsed YAML data as dictionary
         """
         if not self._initialized:
             raise RuntimeError("Processor not initialized. Call initialize() first.")
-        
-        # Step 1: Read file as string
-        yaml_content = read_yaml_file(request_file)
-        
+
         # Step 2: Resolve variables (pvars + configs, no context yet)
         resolved_pass1 = self.resolver.resolve_string(yaml_content)
         
@@ -78,7 +105,10 @@ class RequestProcessor:
         if self.args.generate:
             curl_generator = CurlGenerator(http_client)
             curl_generator.print_curl()
-            return
+            return {
+                "status": "generated",
+                "file": label,
+            }
         
         # Step 8: Print HTTP request
         print_http_request(http_client)
@@ -107,7 +137,7 @@ class RequestProcessor:
         
         return {
             "status" : "complete",
-            "file": request_file,
+            "file": label,
             "asserts": asserts,
             "captures": captures,
             "response": http_client.response,

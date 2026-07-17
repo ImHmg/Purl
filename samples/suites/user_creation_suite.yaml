@@ -1,18 +1,26 @@
 Kind: Suite
 Name: User Creation Suite
-DataSources: ../data/create_users.csv
+DataSet: user-data-set
 Configs:
   - Dev
 Vars:
   api_version: v1
   client_version: 1.0.0
 Requests:
-  - ../requests/create_user.yaml
-  - ../requests/get_user.yaml
+  - Create-User
+  - Get-User
 Options:
   timeout: 30
 
 
+
+---
+Kind: DataSet
+Name: user-data-set
+Data:
+  - {user_id: 1, user_name: "John Doe 1", user_email: "john.doe1@example.com", user_phone: "1234567890", plan: "basic", locale: "en", newsletter: true}
+  - {user_id: 2, user_name: "John Doe 2", user_email: "john.doe2@example.com", user_phone: "1234567890", plan: "basic", locale: "en", newsletter: true}
+  - {user_id: 3, user_name: "John Doe 3", user_email: "john.doe3@example.com", user_phone: "1234567890", plan: "basic", locale: "en", newsletter: true}
 
 ---
 
