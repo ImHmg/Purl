@@ -83,16 +83,47 @@ class HttpClient:
         """Get timeout from request data"""
         return self.request_data.get('Options', {}).get('timeout') or self.args.timeout or None
     
-    def get_ssl(self) -> Optional[bool]:
-        """Get SSL from request data"""
+    def get_ssl(self) -> Any:
+        """Get SSL verification setting for the request.
+
+        Returns:
+            False to disable verification, True to verify against the default
+            CA bundle, or a path string to a custom CA bundle (useful for
+            verifying servers signed by a private/internal CA, often used
+            alongside mTLS).
+        """
         if self.args.insecure:
             return False
-        
-        if self.request_data.get('Options', {}).get('insecure') == True:
+
+        options = self.request_data.get('Options', {})
+        if options.get('insecure') == True:
             return False
 
+        ca_bundle = options.get('ca_bundle') or self.args.ca_bundle
+        if ca_bundle:
+            return ca_bundle
+
         return True
-    
+
+    def get_cert(self) -> Optional[Any]:
+        """Get client certificate for mTLS.
+
+        Options.cert/Options.cert_key take priority over the --cert/--cert-key
+        CLI flags, which act as a project-wide default.
+
+        Returns:
+            A path to a combined cert+key file, a (cert, key) tuple, or None
+        """
+        options = self.request_data.get('Options', {})
+        cert = options.get('cert') or self.args.cert
+        key = options.get('cert_key') or self.args.cert_key
+
+        if cert and key:
+            return (cert, key)
+        if cert:
+            return cert
+        return None
+
     def execute(self) -> Dict[str, Any]:
         """
         Execute HTTP request based on parsed YAML data
@@ -107,6 +138,7 @@ class HttpClient:
         query_params = self.get_query_params()
         timeout = self.get_timeout()
         verify_ssl = self.get_ssl()
+        cert = self.get_cert()
 
         # Prepare request kwargs
         request_kwargs = {
@@ -116,11 +148,15 @@ class HttpClient:
             type : body,
             'verify': verify_ssl
         }
-        
+
         # Add timeout if specified
         if timeout is not None:
             request_kwargs['timeout'] = timeout
-        
+
+        # Add client certificate for mTLS if specified
+        if cert is not None:
+            request_kwargs['cert'] = cert
+
         self.request = request_kwargs
         # Execute request and track time
         start_time = time.time()

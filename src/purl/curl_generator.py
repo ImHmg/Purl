@@ -34,7 +34,8 @@ class CurlGenerator:
         query_params = self.http_client.get_query_params()
         timeout = self.http_client.get_timeout()
         verify_ssl = self.http_client.get_ssl()
-        
+        cert = self.http_client.get_cert()
+
         # Start building curl command
         curl_parts = ["curl"]
         
@@ -73,11 +74,22 @@ class CurlGenerator:
         # Add timeout
         if timeout is not None:
             curl_parts.append(f"--max-time {timeout}")
-        
-        # Add SSL verification flag
-        if not verify_ssl:
+
+        # Add client certificate for mTLS
+        if cert is not None:
+            if isinstance(cert, tuple):
+                cert_file, key_file = cert
+                curl_parts.append(f"--cert {shlex.quote(cert_file)}")
+                curl_parts.append(f"--key {shlex.quote(key_file)}")
+            else:
+                curl_parts.append(f"--cert {shlex.quote(cert)}")
+
+        # Add SSL verification flag / custom CA bundle
+        if isinstance(verify_ssl, str):
+            curl_parts.append(f"--cacert {shlex.quote(verify_ssl)}")
+        elif not verify_ssl:
             curl_parts.append("-k")
-        
+
         # Add verbose flag at the end
         curl_parts.append("-v")
         

@@ -34,11 +34,15 @@ class PurlArgs:
         self.generate: bool = False
         self.debug: bool = False
         self.suite_file: Optional[str] = None
-    
+        self.cert: Optional[str] = None
+        self.cert_key: Optional[str] = None
+        self.ca_bundle: Optional[str] = None
+
     def set_args(self, request_files: List[str], config_names: List[str] = None, working_dir: str = None,
                  timeout: int = None, insecure: bool = False, variables: dict = None,
                  init: bool = False, init_configs: List[str] = None, generate: bool = False, debug: bool = False,
-                 suite_file: Optional[str] = None):
+                 suite_file: Optional[str] = None, cert: Optional[str] = None, cert_key: Optional[str] = None,
+                 ca_bundle: Optional[str] = None):
         """Set parsed arguments"""
         self.request_files = request_files
         self.config_names = config_names or []
@@ -51,6 +55,9 @@ class PurlArgs:
         self.generate = generate
         self.debug = debug
         self.suite_file = suite_file
+        self.cert = cert
+        self.cert_key = cert_key
+        self.ca_bundle = ca_bundle
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -74,6 +81,9 @@ def create_argument_parser() -> argparse.ArgumentParser:
   purl request.yaml -c dev --timeout 60                  # Set timeout to 60 seconds
   purl request.yaml -c dev --insecure                    # Disable SSL verification
   purl request.yaml -c dev --timeout 60 --insecure       # Combine timeout and insecure
+  purl request.yaml -c dev --cert client.pem             # mTLS with a combined cert+key file
+  purl request.yaml -c dev --cert client.crt --cert-key client.key --ca-bundle ca.pem
+                                                         # mTLS with separate cert/key + custom CA
   purl request.yaml -c dev -g                            # Generate cURL command (don't execute)
   purl request.yaml -c dev --generate                    # Same as -g
   purl request.yaml -c dev --debug                       # Enable debug mode
@@ -137,7 +147,31 @@ For more information, visit: https://github.com/ImHmg/Purl
         dest='insecure',
         help='Disable SSL certificate verification'
     )
-    
+
+    parser.add_argument(
+        '--cert',
+        dest='cert',
+        metavar='CERT_FILE',
+        help='Client certificate for mTLS (PEM file, or a combined cert+key file). '
+             'Overridden per-request by Options.cert.'
+    )
+
+    parser.add_argument(
+        '--cert-key',
+        dest='cert_key',
+        metavar='KEY_FILE',
+        help='Client private key for mTLS, if separate from --cert. '
+             'Overridden per-request by Options.cert_key.'
+    )
+
+    parser.add_argument(
+        '--ca-bundle',
+        dest='ca_bundle',
+        metavar='CA_FILE',
+        help='Custom CA bundle to verify the server certificate (e.g. a private/internal CA). '
+             'Overridden per-request by Options.ca_bundle.'
+    )
+
     parser.add_argument(
         '--var',
         action='append',
@@ -212,7 +246,10 @@ def parse_arguments(args: List[str] = None) -> PurlArgs:
         init_configs=init_configs,
         generate=parsed.generate,
         debug=parsed.debug,
-        suite_file=parsed.suite_file
+        suite_file=parsed.suite_file,
+        cert=parsed.cert,
+        cert_key=parsed.cert_key,
+        ca_bundle=parsed.ca_bundle
     )
     
     return purl_args
